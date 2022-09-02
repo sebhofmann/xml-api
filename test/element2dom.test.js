@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-import {XElement2Dom} from "../dist/esm/xml-api.js";
+import {XElement2Dom} from "../dist/esm/xml-json-api.js";
 
 
 const xml = {

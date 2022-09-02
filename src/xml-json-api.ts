@@ -7,8 +7,7 @@ export function dom2XElement(root: Element): XNode {
 }
 
 function getDocument() {
-    const document = new window.DOMParser().parseFromString("<xml></xml>", "application/xml")
-    return document;
+    return new window.DOMParser().parseFromString("<xml></xml>", "application/xml");
 }
 
 function convertXNode(node: XNode): Node {
@@ -163,11 +162,7 @@ export function flattenElement(parent: XElement | XText) {
     }
     const array = new Array<string>();
     flattenElementBuilder(parent, array)
-    const result = array.join("");
-    //console.log(["FLATTEN", parent, "FLATTEN TO", result])
-
-    return result;
-
+    return array.join("");
 }
 
 function flattenElementBuilder(parent: XElement | XText, builder = new Array<string>()) {

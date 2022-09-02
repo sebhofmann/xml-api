@@ -11,17 +11,16 @@
   "dependencies": {
     "jest": "^29.0.1",
     "jest-environment-jsdom": "^29.0.1",
-    "jsdom": "^20.0.0",
     "typescript": "^4.8.2"
   },
-  "types": "./dist/types/xml-api.d.ts",
+  "types": "./dist/types/xml-json-api.d.ts",
   "exports": {
-    "import": "./dist/esm/xml-api.js",
-    "require": "./dist/cjs/xml-api.js",
-    "default": "./dist/esm/xml-api.js"
+    "import": "./dist/esm/xml-json-api.js",
+    "require": "./dist/cjs/xml-json-api.js",
+    "default": "./dist/esm/xml-json-api.js"
   },
-  "main": "/dist/cjs/xml-api.js",
-  "module": "./dist/esm/xml-api.js",
+  "main": "/dist/cjs/xml-json-api.js",
+  "module": "./dist/esm/xml-json-api.js",
   "files": [
     "dist/**",
     "src/**",
@@ -30,6 +29,11 @@
   ],
   "type": "module",
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.18.6"
+    "@babel/plugin-transform-modules-commonjs": "^7.18.6",
+    "jsdom": "^20.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sebhofmann/xml-json-api"
   }
 }
