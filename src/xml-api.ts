@@ -6,11 +6,16 @@ export function dom2XElement(root: Element): XNode {
     return convertNode(root);
 }
 
+function getDocument() {
+    const document = new window.DOMParser().parseFromString("<xml></xml>", "application/xml")
+    return document;
+}
+
 function convertXNode(node: XNode): Node {
     switch (node.type) {
         case "Element":
             const xelement = node as XElement;
-            const element = document.createElement(xelement.name);
+            const element = getDocument().createElement(xelement.name);
 
             for (const child of xelement.content) {
                 if (child.type == "Attribute") {
@@ -23,11 +28,11 @@ function convertXNode(node: XNode): Node {
             }
             return element;
         case "CDATA":
-            return document.createCDATASection((node as XCDATA).text);
+            return getDocument().createCDATASection((node as XCDATA).text);
         case "Comment":
-            return document.createComment((node as XComment).text);
+            return getDocument().createComment((node as XComment).text);
         case "Text":
-            return document.createTextNode((node as XText).text);
+            return getDocument().createTextNode((node as XText).text);
         default:
             throw new Error("Unknown node type " + node.type);
     }
