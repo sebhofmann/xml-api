@@ -1,7 +1,8 @@
 /**
  * @jest-environment jsdom
  */
-const {dom2XElement, XElement2Dom} = require("../dist/xml-api.js");
+import {dom2XElement, XElement2Dom} from "../dist/esm/xml-api.js";
+
 
 const xml = "<xml><!-- comment -->text<elem attr1='attr2' attr3='attr4'></elem></xml>"
 

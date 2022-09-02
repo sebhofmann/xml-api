@@ -2,10 +2,9 @@
   "name": "xml-json-api",
   "version": "0.0.3",
   "description": "",
-  "exports": "./dist/xml-api.js",
   "scripts": {
     "test": "jest",
-    "build": "tsc"
+    "build": "tsc --project tsconfig.esm.json && tsc --project tsconfig.json"
   },
   "author": "Sebastian Hofmann <sebastian.hofmann@gbv.de>",
   "license": "GPL-3.0-or-later",
@@ -15,12 +14,22 @@
     "jsdom": "^20.0.0",
     "typescript": "^4.8.2"
   },
-  "type": "module",
-  "types": "./dist/xml-api.d.ts",
+  "types": "./dist/types/xml-api.d.ts",
+  "exports": {
+    "import": "./dist/esm/xml-api.js",
+    "require": "./dist/cjs/xml-api.js",
+    "default": "./dist/esm/xml-api.js"
+  },
+  "main": "/dist/cjs/xml-api.js",
+  "module": "./dist/esm/xml-api.js",
   "files": [
     "dist/**",
     "src/**",
     "README.md",
-    "tsconfig.json"
-  ]
+    "tsconfig.esm.json"
+  ],
+  "type": "module",
+  "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.18.6"
+  }
 }

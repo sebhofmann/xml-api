@@ -138,6 +138,74 @@ export function findFirstElement(parent: XElement, filterFn: XFilter<XElement>):
     return null;
 }
 
+export function findElement(parent: XElement, filterFn: XFilter<XElement>, result = new Array<XElement>()): Array<XElement> {
+    for (const content of parent.content) {
+        if (content.type == "Element") {
+            const elemContent = content as XElement;
+            if (filterFn(elemContent)) {
+                result.push(elemContent);
+            } else {
+                findElement(elemContent, filterFn, result);
+            }
+        }
+    }
+    return result;
+}
+
+export function flattenElement(parent: XElement | XText) {
+    if(parent==null){
+        return null;
+    }
+    const array = new Array<string>();
+    flattenElementBuilder(parent, array)
+    const result = array.join("");
+    //console.log(["FLATTEN", parent, "FLATTEN TO", result])
+
+    return result;
+
+}
+
+function flattenElementBuilder(parent: XElement | XText, builder = new Array<string>()) {
+    if (parent.type == "Text") {
+        builder.push((parent as XText).text);
+    } else if(parent.type=="Element") {
+        for (const content of (parent as XElement).content) {
+            if (content.type == "Element") {
+                flattenElementBuilder(content as XElement, builder);
+            } else if (content.type == "Text") {
+                builder.push((content as XText).text);
+            }
+        }
+    }
+}
+
+export function flattenElementExcept(parent: XElement | XText, filter: XFilter<XElement>) {
+    const arr = new Array<string | XElement>()
+
+    flattenElementExceptBuilder(parent, arr, filter);
+
+    return arr;
+}
+
+function flattenElementExceptBuilder(parent: XElement | XText, builder = new Array<string | XElement>(), filter: XFilter<XElement>) {
+    if (parent.type == "Text") {
+        builder.push((parent as XText).text);
+    } else {
+        for (const content of (parent as XElement).content) {
+            if (content.type == "Element") {
+                if (filter(content as XElement)) {
+                    builder.push(content as XElement);
+                } else {
+                    flattenElementExceptBuilder(content as XElement, builder, filter);
+                }
+            } else if (content.type == "Text") {
+                builder.push((content as XText).text);
+            }
+        }
+    }
+}
+
+
 export function getAttribute(element: XElement, attrName: string, attrValue?: string) {
     for (let node of element.content) {
         if (node.type == "Attribute") {
