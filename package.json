@@ -1,13 +1,13 @@
 {
   "name": "xml-json-api",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
   "exports": "./dist/xml-api.js",
   "scripts": {
     "test": "jest",
     "build": "tsc"
   },
-"author": "Sebastian Hofmann <sebastian.hofmann@gbv.de>",
+  "author": "Sebastian Hofmann <sebastian.hofmann@gbv.de>",
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "jest": "^29.0.1",
@@ -16,5 +16,11 @@
     "typescript": "^4.8.2"
   },
   "type": "module",
-  "types": "./dist/xml-api.d.ts"
+  "types": "./dist/xml-api.d.ts",
+  "files": [
+    "dist/**",
+    "src/**",
+    "README.md",
+    "tsconfig.json"
+  ]
 }
