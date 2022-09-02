@@ -1,7 +1,7 @@
 /**
  * @jest-environment jsdom
  */
-const {dom2XElement} = require("../dist/XmlApi.js");
+const {dom2XElement} = require("../dist/xml-api.js");
 
 
 
