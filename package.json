@@ -1,5 +1,5 @@
 {
-  "name": "xmlapi",
+  "name": "xml-json-api",
   "version": "0.0.1",
   "description": "",
   "exports": "./dist/xml-api.js",
