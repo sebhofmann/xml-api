@@ -21,14 +21,3 @@ test("parse simple xml", async () => {
     expect(result.content[3].type).toBe("CDATA");
     expect(result.content[3].text).toBe("Inhalt");
 });
-
-
-
-test("22", async ()=>{
-    const xml = "<xml>one does not <b>simply</b> convert xml</xml>";
-    const xmlDocument = new window.DOMParser().parseFromString(xml, "application/xml");
-    const root = xmlDocument.children.item(0);
-    const result = dom2XElement(root);
-
-    console.log(JSON.stringify(result, null, 2));
-})
