@@ -1,6 +1,6 @@
 {
   "name": "@mycore-org/xml-json-api",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A simple collection of functions to convert the dom API to simple Javascript Objects vice versa and helper functions to use them in modern frontend frameworks.",
   "scripts": {
     "test": "jest",
