@@ -10,14 +10,24 @@ function getDocument() {
     return new window.DOMParser().parseFromString("<xml></xml>", "application/xml");
 }
 
-function convertXNode(node: XNode): Node {
+export const NODE_TYPE_ATTRIBUTE = "Attribute";
+
+export const NODE_TYPE_TEXT = "Text";
+
+export const NODE_TYPE_ELEMENT = "Element";
+
+const NODE_TYPE_COMMENT = "Comment";
+
+const NODE_TYPE_CDATA = "CDATA";
+
+function convertXNode(node: XText | XElement | XCDATA | XComment | XAttribute): Node {
     switch (node.type) {
-        case "Element":
+        case NODE_TYPE_ELEMENT:
             const xelement = node as XElement;
             const element = getDocument().createElement(xelement.name);
 
             for (const child of xelement.content) {
-                if (child.type == "Attribute") {
+                if (child.type == NODE_TYPE_ATTRIBUTE) {
                     const attrChild = child as XAttribute;
                     element.setAttribute(attrChild.name, attrChild.value);
                 } else {
@@ -26,21 +36,21 @@ function convertXNode(node: XNode): Node {
                 }
             }
             return element;
-        case "CDATA":
+        case NODE_TYPE_CDATA:
             return getDocument().createCDATASection((node as XCDATA).text);
-        case "Comment":
+        case NODE_TYPE_COMMENT:
             return getDocument().createComment((node as XComment).text);
-        case "Text":
+        case NODE_TYPE_TEXT:
             return getDocument().createTextNode((node as XText).text);
         default:
             throw new Error("Unknown node type " + node.type);
     }
 }
 
-function convertNode(node: Node): XNode {
+function convertNode(node: Node): XText | XElement | XCDATA | XComment | XAttribute {
     switch (node.nodeType) {
         case node.ELEMENT_NODE:
-            const elementNode: XElement = {type: "Element", content: [], name: node.nodeName}
+            const elementNode: XElement = {type: NODE_TYPE_ELEMENT, content: [], name: node.nodeName}
             const attributes = (node as Element).attributes as NamedNodeMap;
             for (let i = 0; i < attributes.length; i++) {
                 const attr = attributes.item(i);
@@ -58,17 +68,17 @@ function convertNode(node: Node): XNode {
         case node.ATTRIBUTE_NODE:
             const name = node.nodeName;
             const value = node.nodeValue;
-            return {type: "Attribute", name, value} as XAttribute;
+            return {type: NODE_TYPE_ATTRIBUTE, name, value} as XAttribute;
         case node.TEXT_NODE: {
             const text = node.textContent;
-            return {type: "Text", text} as XText;
+            return {type: NODE_TYPE_TEXT, text} as XText;
         }
         case node.COMMENT_NODE: {
             const text = node.textContent;
-            return {type: "Comment", text} as XComment
+            return {type: NODE_TYPE_COMMENT, text} as XComment
         }
         case node.CDATA_SECTION_NODE: {
-            return {type: "CDATA", text: node.textContent} as XCDATA;
+            return {type: NODE_TYPE_CDATA, text: node.textContent} as XCDATA;
         }
         default:
             throw new Error("Unknown Node Type " + node.nodeType);
@@ -93,7 +103,7 @@ export interface XComment extends XNode {
 
 export interface XElement extends XNode {
     name: string,
-    content: Array<XNode>,
+    content: Array<XText | XElement | XCDATA | XComment | XAttribute>,
     type: "Element"
 }
 
@@ -103,7 +113,6 @@ export interface XText extends XNode {
 }
 
 export interface XNode {
-    type: "Element" | "CDATA" | "Attribute" | "Text" | "Comment"
 }
 
 export interface XFilter<T extends XNode> {
@@ -115,7 +124,7 @@ export function findFirstNode(parent: XElement, filterFn: XFilter<XNode>): XNode
         if (filterFn(content)) {
             return content;
         }
-        if (content.type == "Element") {
+        if (content.type == NODE_TYPE_ELEMENT) {
             const element = findFirstNode(content as XElement, filterFn);
             if (element != null) {
                 return element;
@@ -127,7 +136,7 @@ export function findFirstNode(parent: XElement, filterFn: XFilter<XNode>): XNode
 
 export function findFirstElement(parent: XElement, filterFn: XFilter<XElement>): XElement | null {
     for (const content of parent.content) {
-        if (content.type == "Element") {
+        if (content.type == NODE_TYPE_ELEMENT) {
             const elemContent = content as XElement;
             if (filterFn(elemContent)) {
                 return elemContent;
@@ -144,7 +153,7 @@ export function findFirstElement(parent: XElement, filterFn: XFilter<XElement>):
 
 export function findElement(parent: XElement, filterFn: XFilter<XElement>, result = new Array<XElement>()): Array<XElement> {
     for (const content of parent.content) {
-        if (content.type == "Element") {
+        if (content.type == NODE_TYPE_ELEMENT) {
             const elemContent = content as XElement;
             if (filterFn(elemContent)) {
                 result.push(elemContent);
@@ -156,8 +165,8 @@ export function findElement(parent: XElement, filterFn: XFilter<XElement>, resul
     return result;
 }
 
-export function flattenElement(parent: XElement | XText) {
-    if(parent==null){
+export function flattenElement(parent: XText | XElement | XCDATA | XComment | XAttribute) {
+    if (parent == null) {
         return null;
     }
     const array = new Array<string>();
@@ -165,14 +174,14 @@ export function flattenElement(parent: XElement | XText) {
     return array.join("");
 }
 
-function flattenElementBuilder(parent: XElement | XText, builder = new Array<string>()) {
-    if (parent.type == "Text") {
+function flattenElementBuilder(parent: XText | XElement | XCDATA | XComment | XAttribute, builder = new Array<string>()) {
+    if (parent.type == NODE_TYPE_TEXT) {
         builder.push((parent as XText).text);
-    } else if(parent.type=="Element") {
+    } else if (parent.type == NODE_TYPE_ELEMENT) {
         for (const content of (parent as XElement).content) {
-            if (content.type == "Element") {
+            if (content.type == NODE_TYPE_ELEMENT) {
                 flattenElementBuilder(content as XElement, builder);
-            } else if (content.type == "Text") {
+            } else if (content.type == NODE_TYPE_TEXT) {
                 builder.push((content as XText).text);
             }
         }
@@ -188,17 +197,17 @@ export function flattenElementExcept(parent: XElement | XText, filter: XFilter<X
 }
 
 function flattenElementExceptBuilder(parent: XElement | XText, builder = new Array<string | XElement>(), filter: XFilter<XElement>) {
-    if (parent.type == "Text") {
+    if (parent.type == NODE_TYPE_TEXT) {
         builder.push((parent as XText).text);
     } else {
         for (const content of (parent as XElement).content) {
-            if (content.type == "Element") {
+            if (content.type == NODE_TYPE_ELEMENT) {
                 if (filter(content as XElement)) {
                     builder.push(content as XElement);
                 } else {
                     flattenElementExceptBuilder(content as XElement, builder, filter);
                 }
-            } else if (content.type == "Text") {
+            } else if (content.type == NODE_TYPE_TEXT) {
                 builder.push((content as XText).text);
             }
         }
@@ -208,7 +217,7 @@ function flattenElementExceptBuilder(parent: XElement | XText, builder = new Arr
 
 export function getAttribute(element: XElement, attrName: string, attrValue?: string) {
     for (let node of element.content) {
-        if (node.type == "Attribute") {
+        if (node.type == NODE_TYPE_ATTRIBUTE) {
             if ((node as XAttribute).name === attrName) {
                 if (attrValue == undefined) {
                     return node;
@@ -229,8 +238,8 @@ export function byName(name: string): XFilter<XElement> {
     return (elem) => elem.name === name;
 }
 
-export function and<T extends XNode>(...filters: Array<XFilter<T>>) {
-    return (elem: T) => {
+export function and(...filters: Array<XFilter<XText | XElement | XCDATA | XComment | XAttribute | XNode>>): XFilter<XText | XElement | XCDATA | XComment | XAttribute> {
+    return (elem) => {
         for (const filter of filters) {
             if (!filter(elem)) {
                 return false;
@@ -240,12 +249,17 @@ export function and<T extends XNode>(...filters: Array<XFilter<T>>) {
     }
 }
 
-export function or<T extends XNode>(...filters: Array<XFilter<T>>) {
-    return (elem: T) => {
+export function or(...filters: Array<XFilter<XText | XElement | XCDATA | XComment | XAttribute>>): XFilter<XText | XElement | XCDATA | XComment | XAttribute> {
+    return (elem) => {
         for (const filter of filters) {
             if (filter(elem)) {
                 return true;
             }
         }
+        return false;
     }
+}
+
+export function filterElement(list: Array<XText | XElement | XCDATA | XComment | XAttribute>): Array<XElement> {
+    return list.filter(el => el.type == 'Element') as Array<XElement>
 }
