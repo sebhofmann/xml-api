@@ -2,8 +2,8 @@ export function XElement2Dom(elem: XElement): Element {
     return convertXNode(elem) as Element;
 }
 
-export function dom2XElement(root: Element): XNode {
-    return convertNode(root);
+export function dom2XElement(root: Element): XElement {
+    return convertNode(root) as XElement;
 }
 
 function getDocument() {
@@ -165,7 +165,7 @@ export function findElement(parent: XElement, filterFn: XFilter<XElement>, resul
     return result;
 }
 
-export function flattenElement(parent: XText | XElement | XCDATA | XComment | XAttribute) {
+export function flattenElement(parent: XText | XElement | XCDATA | XComment | XAttribute | null) {
     if (parent == null) {
         return null;
     }
