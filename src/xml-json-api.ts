@@ -113,6 +113,7 @@ export interface XText extends XNode {
 }
 
 export interface XNode {
+    type: "Attribute" | "Text" | "Element" | "Comment" | "CDATA";
 }
 
 export interface XFilter<T extends XNode> {
@@ -230,15 +231,16 @@ export function getAttribute(element: XElement, attrName: string, attrValue?: st
     return null;
 }
 
-export function byAttr(attrName: string, attrValue?: string): XFilter<XElement> {
-    return (elem) => getAttribute(elem, attrName, attrValue) != null;
+export function byAttr(attrName: string, attrValue?: string): XFilter<XNode> {
+    return (elem) => elem.type == "Element" && getAttribute(elem as XElement, attrName, attrValue) != null;
 }
 
-export function byName(name: string): XFilter<XElement> {
-    return (elem) => elem.name === name;
+export function byName(name: string): XFilter<XNode> {
+    return (elem) => elem.type =='Element' && (elem as XElement).name === name;
 }
 
-export function and(...filters: Array<XFilter<XText | XElement | XCDATA | XComment | XAttribute | XNode>>): XFilter<XText | XElement | XCDATA | XComment | XAttribute> {
+export function and(...filters: Array<XFilter<XNode>>):
+    XFilter<XText | XElement | XCDATA | XComment | XAttribute> {
     return (elem) => {
         for (const filter of filters) {
             if (!filter(elem)) {
